@@ -1,3 +1,3 @@
-export type CommonConfig = {
+export type SharedConfig = {
   socketPort: number;
 };

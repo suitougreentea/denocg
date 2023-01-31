@@ -1,6 +1,5 @@
-import { CommonConfig } from "../common/config.ts";
-
-export type ServerConfig = CommonConfig & {
+export type ServerConfig = {
+  socketPort: number;
   assetsRoot: string;
   assetsPort: number;
 };

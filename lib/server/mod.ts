@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.175.0/http/mod.ts";
 import { serveDir } from "https://deno.land/std@0.175.0/http/file_server.ts";
+import { posix } from "https://deno.land/std@0.175.0/path/mod.ts";
 import { ServerConfig } from "./config.ts";
 import {
   JsonRpcIO,
@@ -15,6 +16,7 @@ import {
   ReplicantType,
   TypeDefinition,
 } from "../common/types.ts";
+import { SharedConfig } from "../common/config.ts";
 
 export const launchServer = <TDef extends TypeDefinition>(
   config: ServerConfig,
@@ -25,8 +27,21 @@ export const launchServer = <TDef extends TypeDefinition>(
     senders = new Set<JsonRpcSender<ServerToClientRpc<TDef>>>();
   }
 
+  const sharedConfig: SharedConfig = {
+    socketPort: config.socketPort,
+  };
   const assetsServerPromise = serve(
-    (request) => serveDir(request, { fsRoot: config.assetsRoot }),
+    async (request) => {
+      const normalizedUrl = posix.normalize(
+        decodeURIComponent(new URL(request.url).pathname),
+      );
+      if (normalizedUrl == "/__config.json") {
+        return new Response(JSON.stringify(sharedConfig), {
+          headers: { "Content-Type": "application/json; charset=UTF-8" },
+        });
+      }
+      return await serveDir(request, { fsRoot: config.assetsRoot });
+    },
     { port: config.assetsPort, signal: abortController?.signal },
   );
 
@@ -115,5 +130,4 @@ export const launchServer = <TDef extends TypeDefinition>(
   return Promise.all([assetsServerPromise, socketServerPromise]);
 };
 
-export { type CommonConfig } from "../common/config.ts";
 export { type ServerConfig } from "./config.ts";

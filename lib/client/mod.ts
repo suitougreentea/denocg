@@ -1,10 +1,9 @@
+import { SharedConfig } from "../common/config.ts";
 import { TypeDefinition } from "../common/types.ts";
-import { ClientConfig } from "./config.ts";
 import { Context } from "./context.ts";
 
-export const getContext = async <TDef extends TypeDefinition>(
-  config: ClientConfig,
-) => {
+export const getContext = async <TDef extends TypeDefinition>() => {
+  const config = await (await fetch("/__config.json")).json() as SharedConfig;
   await Promise.resolve();
   const hostname = window.location.hostname;
   const context = new Context<TDef>(
@@ -12,6 +11,3 @@ export const getContext = async <TDef extends TypeDefinition>(
   );
   return context;
 };
-
-export { type CommonConfig } from "../common/config.ts";
-export { type ClientConfig } from "./config.ts";
