@@ -13,7 +13,7 @@ import {
   ReplicantType,
   TypeDefinition,
 } from "../common/types.ts";
-import { ClientReplicant } from "./replicant.ts";
+import { ReplicantManager } from "./replicant_manager.ts";
 import { Socket } from "./socket.ts";
 
 export class Context<TDef extends TypeDefinition> {
@@ -22,25 +22,12 @@ export class Context<TDef extends TypeDefinition> {
   #jsonRpcReceiver: JsonRpcReceiver<ServerToClientRpc<TDef>>;
   closed = false;
 
-  #replicants: {
-    [TKey in ReplicantName<TDef>]?: ClientReplicant<ReplicantType<TDef, TKey>>;
-  } = {};
+  #replicantManager: ReplicantManager<TDef>;
 
   constructor(address: string) {
     this.#socket = new Socket(address);
     this.#socket.addEventListener("open", (_) => {
-      Object.keys(this.#replicants).forEach(
-        async (name: ReplicantName<TDef>) => {
-          const result = await this.#jsonRpcSender.request(
-            "subscribeReplicant",
-            {
-              name,
-              options: { defaultValue: this.#replicants[name]!.defaultValue },
-            },
-          );
-          this.#replicants[name]!.updateValue(result.currentValue);
-        },
-      );
+      this.#replicantManager.redoAllSubscriptions();
     });
     this.#socket.open();
 
@@ -74,45 +61,23 @@ export class Context<TDef extends TypeDefinition> {
           value: ReplicantType<TDef, TKey>;
         },
       ) => {
-        this.#replicants[params.name]?.updateValue(params.value);
+        this.#replicantManager.updateReplicantValue(params.name, params.value);
       },
     };
 
     this.#jsonRpcSender = new JsonRpcSender(jsonRpcIO);
     this.#jsonRpcReceiver = new JsonRpcReceiver(jsonRpcIO, rpcHandler);
+
+    this.#replicantManager = new ReplicantManager(this.#jsonRpcSender);
   }
 
   async getReplicant<TKey extends ReplicantName<TDef>>(
     name: TKey,
-    options?: { defaultValue: ReplicantType<TDef, TKey> },
   ): Promise<Replicant<ReplicantType<TDef, TKey>>> {
     if (this.closed) throw new Error();
 
-    if (!Object.hasOwn(this.#replicants, name)) {
-      await this.#createReplicant(name, options);
-    }
-    const replicant = this.#replicants[name]!;
-    return replicant;
-  }
-
-  async #createReplicant<TKey extends ReplicantName<TDef>>(
-    name: TKey,
-    options?: { defaultValue: ReplicantType<TDef, TKey> },
-  ): Promise<void> {
-    const setter = async (value: ReplicantType<TDef, TKey>) => {
-      await this.#jsonRpcSender.notify("updateReplicantValue", { name, value });
-    };
-    const created = new ClientReplicant<ReplicantType<TDef, typeof name>>(
-      setter,
-      options?.defaultValue,
-    );
-    this.#replicants[name] = created;
-    const filledOptions = { defaultValue: undefined, ...options };
-    const result = await this.#jsonRpcSender.request("subscribeReplicant", {
-      name,
-      options: filledOptions,
-    });
-    created.updateValue(result.currentValue as ReplicantType<TDef, TKey>); // TODO: type check fails here
+    const managedReplicant = await this.#replicantManager.getReplicant(name);
+    return managedReplicant.replicant;
   }
 
   close() {
