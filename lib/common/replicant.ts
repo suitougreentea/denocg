@@ -12,32 +12,37 @@ export type ReplicantHandlers<TValue> = {
 
 export class Replicant<TValue> {
   #handlers: ReplicantHandlers<TValue>;
-  currentValue?: TValue;
+  #currentValue?: TValue;
   #subscriptionHandlers = new Set<ReplicantSubscriptionHandler<TValue>>();
 
-  constructor(handlers: ReplicantHandlers<TValue>) {
+  constructor(handlers: ReplicantHandlers<TValue>, initialValue?: TValue) {
     this.#handlers = handlers;
+    this.#currentValue = initialValue;
     this.#handlers.setValueFromRemote = (value: TValue | undefined) =>
       this.#updateValue(value);
   }
 
   #updateValue(value: TValue | undefined) {
-    if (!equal(this.currentValue, value)) {
-      const oldValue = this.currentValue;
-      this.currentValue = value;
+    if (!equal(this.#currentValue, value)) {
+      const oldValue = this.#currentValue;
+      this.#currentValue = value;
       this.#subscriptionHandlers.forEach((handler) => handler(value, oldValue));
     }
   }
 
   subscribe(handler: ReplicantSubscriptionHandler<TValue>) {
     this.#subscriptionHandlers.add(handler);
-    if (this.currentValue !== undefined) {
-      handler(this.currentValue!, undefined);
+    if (this.#currentValue !== undefined) {
+      handler(this.#currentValue!, undefined);
     }
   }
 
   unsubscribe(handler: ReplicantSubscriptionHandler<TValue>) {
     this.#subscriptionHandlers.delete(handler);
+  }
+
+  getValue() {
+    return this.#currentValue;
   }
 
   async setValue(value: TValue) {

@@ -1,9 +1,8 @@
-import { log, posix, serve, serveDir } from "./deps.ts";
+import { posix, serve, serveDir } from "./deps.ts";
 import { SharedConfig } from "../common/config.ts";
 import { TypeDefinition } from "../common/types.ts";
 import { ServerConfig } from "./config.ts";
-
-const logger = log.getLogger();
+import { logger } from "./logger.ts";
 
 export class AssetsServer<TDef extends TypeDefinition> {
   #config: ServerConfig<TDef>;
@@ -14,7 +13,7 @@ export class AssetsServer<TDef extends TypeDefinition> {
     this.#abortSignal = abortSignal;
   }
 
-  start() {
+  async start() {
     const sharedConfig: SharedConfig = {
       socketPort: this.#config.socketPort,
     };
@@ -35,5 +34,7 @@ export class AssetsServer<TDef extends TypeDefinition> {
     );
 
     logger.info("Assets server started");
+
+    await Promise.resolve();
   }
 }

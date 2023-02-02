@@ -5,9 +5,11 @@ import {
   TypeDefinition,
 } from "../common/types.ts";
 import { ServerClient } from "./client.ts";
-import { ServerConfig } from "./config.ts";
+import { ReplicantConfigEntry, ServerConfig } from "./config.ts";
+import { logger } from "./logger.ts";
 
 type ServerManagedReplicant<TDef extends TypeDefinition, TValue> = {
+  config: ReplicantConfigEntry<TValue>;
   currentValue?: TValue;
   handlers: ReplicantHandlers<TValue>;
   replicant: Replicant<TValue>;
@@ -22,24 +24,43 @@ export class ReplicantManager<TDef extends TypeDefinition> {
       ReplicantType<TDef, TKey>
     >;
   } = {};
+  #dirty = false;
+  #ioInProgress = false;
+  #intervalId = -1;
 
   constructor(config: ServerConfig<TDef>) {
     this.#config = config;
   }
 
-  #createReplicant<TKey extends ReplicantName<TDef>>(name: TKey) {
-    const replicantConfig = this.#config.replicants
-      ? this.#config.replicants[name]
-      : {};
+  async init() {
+    await this.#deserialize();
+    this.#intervalId = setInterval(() => this.#trySerializeIfDirty(), 500);
+  }
+
+  dispose() {
+    clearInterval(this.#intervalId);
+  }
+
+  #createReplicant<TKey extends ReplicantName<TDef>>(
+    name: TKey,
+    overriddenDefaultValue?: ReplicantType<TDef, TKey>,
+  ) {
+    const replicantConfigEntry: ReplicantConfigEntry<
+      ReplicantType<TDef, TKey>
+    > = this.#config.replicants?.[name] ?? {};
     const handlers: ReplicantHandlers<ReplicantType<TDef, TKey>> = {};
     handlers.setValueFromLocal = (value: ReplicantType<TDef, TKey>) => {
       this.#managedReplicants[name]!.currentValue = value;
+      this.#setDirty();
       this.#broadcastUpdate(name);
       return Promise.resolve();
     };
-    const replicant = new Replicant(handlers);
+    const initialValue = overriddenDefaultValue ??
+      replicantConfigEntry?.defaultValue;
+    const replicant = new Replicant(handlers, initialValue);
     this.#managedReplicants[name] = {
-      currentValue: replicantConfig?.defaultValue,
+      config: replicantConfigEntry,
+      currentValue: initialValue,
       handlers,
       replicant,
       subscribingClients: new Set(),
@@ -75,6 +96,7 @@ export class ReplicantManager<TDef extends TypeDefinition> {
 
     const managedReplicant = this.#managedReplicants[name]!;
     managedReplicant.currentValue = value;
+    this.#setDirty();
     managedReplicant.handlers.setValueFromRemote!(value);
     this.#broadcastUpdate(name);
   }
@@ -82,7 +104,61 @@ export class ReplicantManager<TDef extends TypeDefinition> {
   #broadcastUpdate<TKey extends ReplicantName<TDef>>(name: TKey) {
     const managedReplicant = this.#managedReplicants[name]!;
     managedReplicant.subscribingClients.forEach((client) => {
-      client.jsonRpcSender.notify("updateReplicantValue", { name, value: managedReplicant.currentValue! });
+      client.jsonRpcSender.notify("updateReplicantValue", {
+        name,
+        value: managedReplicant.currentValue!,
+      });
     });
+  }
+
+  #setDirty() {
+    this.#dirty = true;
+  }
+
+  #trySerializeIfDirty() {
+    if (!this.#dirty) return;
+    if (this.#ioInProgress) return;
+    this.#serialize();
+  }
+
+  async #serialize() {
+    if (this.#ioInProgress) throw new Error();
+    this.#ioInProgress = true;
+    const serializedObject: { [key: string]: unknown } = {};
+    Object.entries(this.#managedReplicants).forEach(
+      ([name, value]: [string, ServerManagedReplicant<TDef, unknown>]) => {
+        if (value.config.persistent === false) return;
+        serializedObject[name] = value.currentValue;
+      },
+    );
+    await Deno.writeTextFile(
+      "replicants.json",
+      JSON.stringify(serializedObject),
+    );
+    this.#ioInProgress = false;
+    this.#dirty = false;
+    logger.debug("Replicants serialized");
+  }
+
+  async #deserialize() {
+    if (this.#ioInProgress) throw new Error();
+    this.#ioInProgress = true;
+    try {
+      const serializedObject = JSON.parse(
+        await Deno.readTextFile("replicants.json"),
+      );
+      Object.entries(serializedObject).forEach(([name, initialValue]) => {
+        // TODO: validation?
+        this.#createReplicant(
+          name,
+          initialValue as ReplicantType<TDef, string>,
+        );
+      });
+      logger.debug("Replicants deserialized");
+    } catch (e) {
+      logger.warning(`Replicants deserialized with error, ${e}`);
+    } finally {
+      this.#ioInProgress = false;
+    }
   }
 }
