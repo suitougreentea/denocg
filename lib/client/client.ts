@@ -16,7 +16,7 @@ import {
 import { ReplicantManager } from "./replicant_manager.ts";
 import { Socket } from "./socket.ts";
 
-export class Context<TDef extends TypeDefinition> {
+export class Client<TDef extends TypeDefinition> {
   #socket: Socket;
   #jsonRpcSender: JsonRpcSender<ClientToServerRpc<TDef>>;
   #jsonRpcReceiver: JsonRpcReceiver<ServerToClientRpc<TDef>>;

@@ -1,13 +1,12 @@
 import { SharedConfig } from "../common/config.ts";
 import { TypeDefinition } from "../common/types.ts";
-import { Context } from "./context.ts";
+import { Client } from "./client.ts";
 
-export const getContext = async <TDef extends TypeDefinition>() => {
+export const getClient = async <TDef extends TypeDefinition>() => {
   const config = await (await fetch("/__config.json")).json() as SharedConfig;
-  await Promise.resolve();
   const hostname = window.location.hostname;
-  const context = new Context<TDef>(
+  const client = new Client<TDef>(
     `ws://${hostname}:${config.socketPort}/`,
   );
-  return context;
+  return client;
 };
