@@ -1,13 +1,14 @@
 import { serve } from "./deps.ts";
 import { ServerConfig } from "./config.ts";
 import {
+  MessageListener,
   MessageName,
   MessageParams,
   ReplicantName,
   ReplicantType,
+  RequestHandler,
   RequestName,
   RequestParams,
-  RequestResult,
   TypeDefinition,
 } from "../common/types.ts";
 import { ReplicantManager } from "./replicant_manager.ts";
@@ -109,9 +110,7 @@ export class SocketServer<TDef extends TypeDefinition> {
 
   registerRequestHandler<TKey extends RequestName<TDef>>(
     name: TKey,
-    handler: (
-      params: RequestParams<TDef, TKey>,
-    ) => Promise<RequestResult<TDef, TKey>>,
+    handler: RequestHandler<TDef, TKey>,
     overwrite: boolean,
   ) {
     this.#requestManager.registerHandler(name, handler, overwrite);
@@ -119,9 +118,7 @@ export class SocketServer<TDef extends TypeDefinition> {
 
   unregisterRequestHandler<TKey extends RequestName<TDef>>(
     name: TKey,
-    handler: (
-      params: RequestParams<TDef, TKey>,
-    ) => Promise<RequestResult<TDef, TKey>>,
+    handler: RequestHandler<TDef, TKey>,
   ) {
     this.#requestManager.unregisterHandler(name, handler);
   }
@@ -135,14 +132,14 @@ export class SocketServer<TDef extends TypeDefinition> {
 
   addMessageListener<TKey extends MessageName<TDef>>(
     name: TKey,
-    listener: (params: MessageParams<TDef, TKey>) => void,
+    listener: MessageListener<TDef, TKey>,
   ) {
     this.#messageManager.addListener(name, listener);
   }
 
   removeMessageListener<TKey extends MessageName<TDef>>(
     name: TKey,
-    listener: (params: MessageParams<TDef, TKey>) => void,
+    listener: MessageListener<TDef, TKey>,
   ) {
     this.#messageManager.removeListener(name, listener);
   }

@@ -1,4 +1,9 @@
-import { MessageName, MessageParams, TypeDefinition } from "../common/types.ts";
+import {
+  MessageListener,
+  MessageName,
+  MessageParams,
+  TypeDefinition,
+} from "../common/types.ts";
 import { ServerClient } from "./client.ts";
 
 export class MessageManager<TDef extends TypeDefinition> {
@@ -35,7 +40,7 @@ export class MessageManager<TDef extends TypeDefinition> {
 
   addListener<TKey extends MessageName<TDef>>(
     name: TKey,
-    listener: (params: MessageParams<TDef, TKey>) => void,
+    listener: MessageListener<TDef, TKey>,
   ) {
     if (!(name in this.#listeners)) {
       this.#listeners[name] = new Set();
@@ -45,7 +50,7 @@ export class MessageManager<TDef extends TypeDefinition> {
 
   removeListener<TKey extends MessageName<TDef>>(
     name: TKey,
-    listener: (params: MessageParams<TDef, TKey>) => void,
+    listener: MessageListener<TDef, TKey>,
   ) {
     if (!(name in this.#listeners)) return;
     this.#listeners[name]!.delete(listener);

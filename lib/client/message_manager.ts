@@ -1,13 +1,16 @@
 import { JsonRpcSender } from "../common/json_rpc.ts";
 import { ClientToServerRpc } from "../common/rpc_definition.ts";
-import { MessageName, MessageParams, TypeDefinition } from "../common/types.ts";
+import {
+  MessageListener,
+  MessageName,
+  MessageParams,
+  TypeDefinition,
+} from "../common/types.ts";
 
 export class MessageManager<TDef extends TypeDefinition> {
   #jsonRpcSender: JsonRpcSender<ClientToServerRpc<TDef>>;
   #listeners: {
-    [TKey in MessageName<TDef>]?: Set<
-      (params: MessageParams<TDef, TKey>) => void
-    >;
+    [TKey in MessageName<TDef>]?: Set<MessageListener<TDef, TKey>>;
   } = {};
 
   constructor(jsonRpcSender: JsonRpcSender<ClientToServerRpc<TDef>>) {
@@ -30,7 +33,7 @@ export class MessageManager<TDef extends TypeDefinition> {
 
   addListener<TKey extends MessageName<TDef>>(
     name: TKey,
-    listener: (params: MessageParams<TDef, TKey>) => void,
+    listener: MessageListener<TDef, TKey>,
   ) {
     if (!(name in this.#listeners)) {
       this.#listeners[name] = new Set();
@@ -40,7 +43,7 @@ export class MessageManager<TDef extends TypeDefinition> {
 
   removeListener<TKey extends MessageName<TDef>>(
     name: TKey,
-    listener: (params: MessageParams<TDef, TKey>) => void,
+    listener: MessageListener<TDef, TKey>,
   ) {
     if (!(name in this.#listeners)) return;
     this.#listeners[name]!.delete(listener);

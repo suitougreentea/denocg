@@ -33,6 +33,14 @@ export type RequestResult<
 > = TDef["requests"][TKey] extends { result: unknown }
   ? TDef["requests"][TKey]["result"]
   : void;
+export type RequestHandler<
+  TDef extends TypeDefinition,
+  TKey extends RequestName<TDef>,
+> = RequestParams<TDef, TKey> extends undefined
+  ? () => RequestResult<TDef, TKey> | Promise<RequestResult<TDef, TKey>>
+  : (
+    params: RequestParams<TDef, TKey>,
+  ) => RequestResult<TDef, TKey> | Promise<RequestResult<TDef, TKey>>;
 
 export type MessageName<TDef extends TypeDefinition> = keyof TDef["messages"];
 export type MessageParams<
@@ -41,3 +49,8 @@ export type MessageParams<
 > = TDef["messages"][TKey] extends { params: unknown }
   ? TDef["messages"][TKey]["params"]
   : undefined;
+export type MessageListener<
+  TDef extends TypeDefinition,
+  TKey extends MessageName<TDef>,
+> = MessageParams<TDef, TKey> extends undefined ? () => void
+  : (params: MessageParams<TDef, TKey>) => void;

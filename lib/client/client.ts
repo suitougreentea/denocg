@@ -10,6 +10,7 @@ import {
   ServerToClientRpc,
 } from "../common/rpc_definition.ts";
 import {
+  MessageListener,
   MessageName,
   MessageParams,
   ReplicantName,
@@ -118,16 +119,14 @@ export class Client<TDef extends TypeDefinition> {
 
   addMessageListener<TKey extends MessageName<TDef>>(
     name: TKey,
-    listener: MessageParams<TDef, TKey> extends undefined ? () => void
-      : (params: MessageParams<TDef, TKey>) => void,
+    listener: MessageListener<TDef, TKey>,
   ) {
     this.#messageManager.addListener(name, listener);
   }
 
   removeMessageListener<TKey extends MessageName<TDef>>(
     name: TKey,
-    listener: MessageParams<TDef, TKey> extends undefined ? () => void
-      : (params: MessageParams<TDef, TKey>) => void,
+    listener: MessageListener<TDef, TKey>,
   ) {
     this.#messageManager.removeListener(name, listener);
   }
