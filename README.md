@@ -1,7 +1,7 @@
 # denocg
 
-[Experimental / PoC] Create broadcast graphics using Deno and a browser (NodeCG
-alternative)
+[Experimental / PoC] Create broadcast graphics using [Deno](https://deno.land/)
+and a browser ([NodeCG](https://github.com/nodecg/nodecg) alternative)
 
 ## Features / Differences from NodeCG
 
