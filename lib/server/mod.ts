@@ -23,15 +23,6 @@ export const launchServer = async <TDef extends TypeDefinition>(
     getReplicant: <TKey extends ReplicantName<TDef>>(
       name: TKey,
     ) => socketServer.getReplicant(name),
-    registerRequestHandler: <TKey extends RequestName<TDef>>(
-      name: TKey,
-      handler: RequestHandler<TDef, TKey>,
-      overwrite = false,
-    ) => socketServer.registerRequestHandler(name, handler, overwrite),
-    unregisterRequestHandler: <TKey extends RequestName<TDef>>(
-      name: TKey,
-      handler: RequestHandler<TDef, TKey>,
-    ) => socketServer.unregisterRequestHandler(name, handler),
     broadcastMessage: <TKey extends MessageName<TDef>>(
       ...[name, params]: MessageParams<TDef, TKey> extends undefined
         ? [name: TKey, params?: undefined]
@@ -45,6 +36,15 @@ export const launchServer = async <TDef extends TypeDefinition>(
       name: TKey,
       listener: MessageListener<TDef, TKey>,
     ) => socketServer.removeMessageListener(name, listener),
+    registerRequestHandler: <TKey extends RequestName<TDef>>(
+      name: TKey,
+      handler: RequestHandler<TDef, TKey>,
+      overwrite = false,
+    ) => socketServer.registerRequestHandler(name, handler, overwrite),
+    unregisterRequestHandler: <TKey extends RequestName<TDef>>(
+      name: TKey,
+      handler: RequestHandler<TDef, TKey>,
+    ) => socketServer.unregisterRequestHandler(name, handler),
   };
 };
 

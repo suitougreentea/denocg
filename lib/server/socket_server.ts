@@ -24,8 +24,8 @@ export class SocketServer<TDef extends TypeDefinition> {
 
   #clients = new Set<ServerClient<TDef>>();
   #replicantManager: ReplicantManager<TDef>;
-  #requestManager: RequestManager<TDef>;
   #messageManager: MessageManager<TDef>;
+  #requestManager: RequestManager<TDef>;
 
   constructor(config: ServerConfig<TDef>, abortSignal?: AbortSignal) {
     this.#config = config;
@@ -65,23 +65,23 @@ export class SocketServer<TDef extends TypeDefinition> {
               value,
             );
           },
-          onRequestToServer: <TKey extends RequestName<TDef>>(
-            client: ServerClient<TDef>,
-            name: TKey,
-            params: RequestParams<TDef, TKey>,
-          ) => {
-            return this.#requestManager.handleRequest(
-              client,
-              name,
-              params,
-            );
-          },
           onBroadcastMessage: <TKey extends MessageName<TDef>>(
             client: ServerClient<TDef>,
             name: TKey,
             params: MessageParams<TDef, TKey>,
           ) => {
             this.#messageManager.receiveMessage(
+              client,
+              name,
+              params,
+            );
+          },
+          onRequestToServer: <TKey extends RequestName<TDef>>(
+            client: ServerClient<TDef>,
+            name: TKey,
+            params: RequestParams<TDef, TKey>,
+          ) => {
+            return this.#requestManager.handleRequest(
               client,
               name,
               params,
@@ -108,21 +108,6 @@ export class SocketServer<TDef extends TypeDefinition> {
     return managedReplicant.replicant;
   }
 
-  registerRequestHandler<TKey extends RequestName<TDef>>(
-    name: TKey,
-    handler: RequestHandler<TDef, TKey>,
-    overwrite: boolean,
-  ) {
-    this.#requestManager.registerHandler(name, handler, overwrite);
-  }
-
-  unregisterRequestHandler<TKey extends RequestName<TDef>>(
-    name: TKey,
-    handler: RequestHandler<TDef, TKey>,
-  ) {
-    this.#requestManager.unregisterHandler(name, handler);
-  }
-
   broadcastMessage<TKey extends MessageName<TDef>>(
     name: TKey,
     params: MessageParams<TDef, TKey>,
@@ -142,5 +127,20 @@ export class SocketServer<TDef extends TypeDefinition> {
     listener: MessageListener<TDef, TKey>,
   ) {
     this.#messageManager.removeListener(name, listener);
+  }
+
+  registerRequestHandler<TKey extends RequestName<TDef>>(
+    name: TKey,
+    handler: RequestHandler<TDef, TKey>,
+    overwrite: boolean,
+  ) {
+    this.#requestManager.registerHandler(name, handler, overwrite);
+  }
+
+  unregisterRequestHandler<TKey extends RequestName<TDef>>(
+    name: TKey,
+    handler: RequestHandler<TDef, TKey>,
+  ) {
+    this.#requestManager.unregisterHandler(name, handler);
   }
 }

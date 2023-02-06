@@ -28,16 +28,16 @@ export type ServerClientHandlers<TDef extends TypeDefinition> = {
     name: TKey,
     value: ReplicantType<TDef, TKey>,
   ) => void;
-  onRequestToServer: <TKey extends RequestName<TDef>>(
-    client: ServerClient<TDef>,
-    name: TKey,
-    params: RequestParams<TDef, TKey>,
-  ) => Promise<RequestResult<TDef, TKey>>;
   onBroadcastMessage: <TKey extends MessageName<TDef>>(
     client: ServerClient<TDef>,
     name: TKey,
     params: MessageParams<TDef, TKey>,
   ) => void;
+  onRequestToServer: <TKey extends RequestName<TDef>>(
+    client: ServerClient<TDef>,
+    name: TKey,
+    params: RequestParams<TDef, TKey>,
+  ) => Promise<RequestResult<TDef, TKey>>;
 };
 
 export class ServerClient<TDef extends TypeDefinition> {
@@ -69,6 +69,14 @@ export class ServerClient<TDef extends TypeDefinition> {
       ) => {
         this.#handler.onUpdateReplicantValue(this, params.name, params.value);
       },
+      broadcastMessage: <TKey extends MessageName<TDef>>(
+        params: {
+          name: TKey;
+          params: MessageParams<TDef, TKey>;
+        },
+      ) => {
+        this.#handler.onBroadcastMessage(this, params.name, params.params);
+      },
       requestToServer: async <TKey extends RequestName<TDef>>(
         params: {
           name: TKey;
@@ -81,14 +89,6 @@ export class ServerClient<TDef extends TypeDefinition> {
           params.params,
         );
         return { result };
-      },
-      broadcastMessage: <TKey extends MessageName<TDef>>(
-        params: {
-          name: TKey;
-          params: MessageParams<TDef, TKey>;
-        },
-      ) => {
-        this.#handler.onBroadcastMessage(this, params.name, params.params);
       },
     };
 

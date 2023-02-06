@@ -96,18 +96,6 @@ export class Client<TDef extends TypeDefinition> {
     return managedReplicant.replicant;
   }
 
-  async requestToServer<TKey extends RequestName<TDef>>(
-    ...[name, params]: RequestParams<TDef, TKey> extends undefined
-      ? [name: TKey, params?: undefined]
-      : [name: TKey, params: RequestParams<TDef, TKey>]
-  ) {
-    const rawResult = await this.#jsonRpcSender.request("requestToServer", {
-      name,
-      params,
-    });
-    return rawResult.result;
-  }
-
   // broadcastMessage<TKey extends MessageName<TDef>>(name: TKey, params: MessageParams<TDef, TKey>) {
   broadcastMessage<TKey extends MessageName<TDef>>(
     ...[name, params]: MessageParams<TDef, TKey> extends undefined
@@ -129,6 +117,18 @@ export class Client<TDef extends TypeDefinition> {
     listener: MessageListener<TDef, TKey>,
   ) {
     this.#messageManager.removeListener(name, listener);
+  }
+
+  async requestToServer<TKey extends RequestName<TDef>>(
+    ...[name, params]: RequestParams<TDef, TKey> extends undefined
+      ? [name: TKey, params?: undefined]
+      : [name: TKey, params: RequestParams<TDef, TKey>]
+  ) {
+    const rawResult = await this.#jsonRpcSender.request("requestToServer", {
+      name,
+      params,
+    });
+    return rawResult.result;
   }
 
   close() {

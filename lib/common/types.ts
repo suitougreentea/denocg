@@ -3,12 +3,12 @@ export type TypeDefinition = {
     [TKey: string]: unknown;
     [TKey: number | symbol]: never;
   };
-  requests: {
-    [TKey: string]: { params?: unknown; result?: unknown };
-    [TKey: number | symbol]: never;
-  };
   messages: {
     [TKey: string]: { params?: unknown };
+    [TKey: number | symbol]: never;
+  };
+  requests: {
+    [TKey: string]: { params?: unknown; result?: unknown };
     [TKey: number | symbol]: never;
   };
 };
@@ -19,6 +19,19 @@ export type ReplicantType<
   TDef extends TypeDefinition,
   TKey extends ReplicantName<TDef>,
 > = TDef["replicants"][TKey];
+
+export type MessageName<TDef extends TypeDefinition> = keyof TDef["messages"];
+export type MessageParams<
+  TDef extends TypeDefinition,
+  TKey extends MessageName<TDef>,
+> = TDef["messages"][TKey] extends { params: unknown }
+  ? TDef["messages"][TKey]["params"]
+  : undefined;
+export type MessageListener<
+  TDef extends TypeDefinition,
+  TKey extends MessageName<TDef>,
+> = MessageParams<TDef, TKey> extends undefined ? () => void
+  : (params: MessageParams<TDef, TKey>) => void;
 
 export type RequestName<TDef extends TypeDefinition> = keyof TDef["requests"];
 export type RequestParams<
@@ -41,16 +54,3 @@ export type RequestHandler<
   : (
     params: RequestParams<TDef, TKey>,
   ) => RequestResult<TDef, TKey> | Promise<RequestResult<TDef, TKey>>;
-
-export type MessageName<TDef extends TypeDefinition> = keyof TDef["messages"];
-export type MessageParams<
-  TDef extends TypeDefinition,
-  TKey extends MessageName<TDef>,
-> = TDef["messages"][TKey] extends { params: unknown }
-  ? TDef["messages"][TKey]["params"]
-  : undefined;
-export type MessageListener<
-  TDef extends TypeDefinition,
-  TKey extends MessageName<TDef>,
-> = MessageParams<TDef, TKey> extends undefined ? () => void
-  : (params: MessageParams<TDef, TKey>) => void;
