@@ -1,26 +1,37 @@
 import { serve } from "./deps.ts";
 import { ServerConfig } from "./config.ts";
 import {
+  MessageName,
+  MessageParams,
   ReplicantName,
   ReplicantType,
+  RequestName,
+  RequestParams,
+  RequestResult,
   TypeDefinition,
 } from "../common/types.ts";
 import { ReplicantManager } from "./replicant_manager.ts";
 import { ServerClient, ServerClientHandlers } from "./client.ts";
 import { Replicant } from "../common/replicant.ts";
 import { logger } from "./logger.ts";
+import { MessageManager } from "./message_manager.ts";
+import { RequestManager } from "./request_manager.ts";
 
 export class SocketServer<TDef extends TypeDefinition> {
   #config: ServerConfig<TDef>;
   #abortSignal?: AbortSignal;
 
-  #replicantManager: ReplicantManager<TDef>;
   #clients = new Set<ServerClient<TDef>>();
+  #replicantManager: ReplicantManager<TDef>;
+  #requestManager: RequestManager<TDef>;
+  #messageManager: MessageManager<TDef>;
 
   constructor(config: ServerConfig<TDef>, abortSignal?: AbortSignal) {
     this.#config = config;
     this.#abortSignal = abortSignal;
     this.#replicantManager = new ReplicantManager(this.#config);
+    this.#requestManager = new RequestManager();
+    this.#messageManager = new MessageManager(this.#clients);
   }
 
   async start() {
@@ -53,6 +64,28 @@ export class SocketServer<TDef extends TypeDefinition> {
               value,
             );
           },
+          onRequestToServer: <TKey extends RequestName<TDef>>(
+            client: ServerClient<TDef>,
+            name: TKey,
+            params: RequestParams<TDef, TKey>,
+          ) => {
+            return this.#requestManager.handleRequest(
+              client,
+              name,
+              params,
+            );
+          },
+          onBroadcastMessage: <TKey extends MessageName<TDef>>(
+            client: ServerClient<TDef>,
+            name: TKey,
+            params: MessageParams<TDef, TKey>,
+          ) => {
+            this.#messageManager.receiveMessage(
+              client,
+              name,
+              params,
+            );
+          },
         };
         this.#clients.add(new ServerClient(socket, handlers));
       });
@@ -72,5 +105,45 @@ export class SocketServer<TDef extends TypeDefinition> {
   ): Replicant<ReplicantType<TDef, TKey>> {
     const managedReplicant = this.#replicantManager.getReplicant(name);
     return managedReplicant.replicant;
+  }
+
+  registerRequestHandler<TKey extends RequestName<TDef>>(
+    name: TKey,
+    handler: (
+      params: RequestParams<TDef, TKey>,
+    ) => Promise<RequestResult<TDef, TKey>>,
+    overwrite: boolean,
+  ) {
+    this.#requestManager.registerHandler(name, handler, overwrite);
+  }
+
+  unregisterRequestHandler<TKey extends RequestName<TDef>>(
+    name: TKey,
+    handler: (
+      params: RequestParams<TDef, TKey>,
+    ) => Promise<RequestResult<TDef, TKey>>,
+  ) {
+    this.#requestManager.unregisterHandler(name, handler);
+  }
+
+  broadcastMessage<TKey extends MessageName<TDef>>(
+    name: TKey,
+    params: MessageParams<TDef, TKey>,
+  ) {
+    this.#messageManager.broadcastMessage(name, params);
+  }
+
+  addMessageListener<TKey extends MessageName<TDef>>(
+    name: TKey,
+    listener: (params: MessageParams<TDef, TKey>) => void,
+  ) {
+    this.#messageManager.addListener(name, listener);
+  }
+
+  removeMessageListener<TKey extends MessageName<TDef>>(
+    name: TKey,
+    listener: (params: MessageParams<TDef, TKey>) => void,
+  ) {
+    this.#messageManager.removeListener(name, listener);
   }
 }

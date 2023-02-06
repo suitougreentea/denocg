@@ -1,6 +1,11 @@
 import {
+  MessageName,
+  MessageParams,
   ReplicantName,
   ReplicantType,
+  RequestName,
+  RequestParams,
+  RequestResult,
   TypeDefinition,
 } from "../common/types.ts";
 import {
@@ -22,6 +27,16 @@ export type ServerClientHandlers<TDef extends TypeDefinition> = {
     client: ServerClient<TDef>,
     name: TKey,
     value: ReplicantType<TDef, TKey>,
+  ) => void;
+  onRequestToServer: <TKey extends RequestName<TDef>>(
+    client: ServerClient<TDef>,
+    name: TKey,
+    params: RequestParams<TDef, TKey>,
+  ) => Promise<RequestResult<TDef, TKey>>;
+  onBroadcastMessage: <TKey extends MessageName<TDef>>(
+    client: ServerClient<TDef>,
+    name: TKey,
+    params: MessageParams<TDef, TKey>,
   ) => void;
 };
 
@@ -53,6 +68,27 @@ export class ServerClient<TDef extends TypeDefinition> {
         },
       ) => {
         this.#handler.onUpdateReplicantValue(this, params.name, params.value);
+      },
+      requestToServer: async <TKey extends RequestName<TDef>>(
+        params: {
+          name: TKey;
+          params: RequestParams<TDef, TKey>;
+        },
+      ) => {
+        const result = await this.#handler.onRequestToServer(
+          this,
+          params.name,
+          params.params,
+        );
+        return { result };
+      },
+      broadcastMessage: <TKey extends MessageName<TDef>>(
+        params: {
+          name: TKey;
+          params: MessageParams<TDef, TKey>;
+        },
+      ) => {
+        this.#handler.onBroadcastMessage(this, params.name, params.params);
       },
     };
 

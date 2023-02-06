@@ -62,8 +62,27 @@ export class JsonRpcReceiver<THandler extends JsonRpcHandler> {
       const respond = async (result: unknown) => {
         await this.#io.send({ jsonrpc: "2.0", id, result });
       };
+      const respondError = async (error: unknown) => {
+        if (error instanceof Error) {
+          await this.#io.send({
+            jsonrpc: "2.0",
+            id,
+            error: { code: -32000, message: error.message, data: error },
+          });
+        } else {
+          await this.#io.send({
+            jsonrpc: "2.0",
+            id,
+            error: { code: -32099, message: "Unknown error", data: error },
+          });
+        }
+      };
       if (method in this.#handler) {
-        respond(await this.#handler[method](params));
+        try {
+          respond(await this.#handler[method](params));
+        } catch (error) {
+          respondError(error);
+        }
       }
     });
   }

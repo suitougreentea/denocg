@@ -3,14 +3,19 @@ import {
   JsonRpcReceiver,
   JsonRpcSender,
 } from "../common/json_rpc.ts";
+import { MessageManager } from "./message_manager.ts";
 import { Replicant } from "../common/replicant.ts";
 import {
   ClientToServerRpc,
   ServerToClientRpc,
 } from "../common/rpc_definition.ts";
 import {
+  MessageName,
+  MessageParams,
   ReplicantName,
   ReplicantType,
+  RequestName,
+  RequestParams,
   TypeDefinition,
 } from "../common/types.ts";
 import { ReplicantManager } from "./replicant_manager.ts";
@@ -23,6 +28,7 @@ export class Client<TDef extends TypeDefinition> {
   closed = false;
 
   #replicantManager: ReplicantManager<TDef>;
+  #messageManager: MessageManager<TDef>;
 
   constructor(address: string) {
     this.#socket = new Socket(address);
@@ -63,12 +69,21 @@ export class Client<TDef extends TypeDefinition> {
       ) => {
         this.#replicantManager.updateReplicantValue(params.name, params.value);
       },
+      broadcastMessage: <TKey extends MessageName<TDef>>(
+        params: {
+          name: TKey;
+          params: MessageParams<TDef, TKey>;
+        },
+      ) => {
+        this.#messageManager.receiveMessage(params.name, params.params);
+      },
     };
 
     this.#jsonRpcSender = new JsonRpcSender(jsonRpcIO);
     this.#jsonRpcReceiver = new JsonRpcReceiver(jsonRpcIO, rpcHandler);
 
     this.#replicantManager = new ReplicantManager(this.#jsonRpcSender);
+    this.#messageManager = new MessageManager(this.#jsonRpcSender);
   }
 
   async getReplicant<TKey extends ReplicantName<TDef>>(
@@ -78,6 +93,43 @@ export class Client<TDef extends TypeDefinition> {
 
     const managedReplicant = await this.#replicantManager.getReplicant(name);
     return managedReplicant.replicant;
+  }
+
+  async requestToServer<TKey extends RequestName<TDef>>(
+    ...[name, params]: RequestParams<TDef, TKey> extends undefined
+      ? [name: TKey, params?: undefined]
+      : [name: TKey, params: RequestParams<TDef, TKey>]
+  ) {
+    const rawResult = await this.#jsonRpcSender.request("requestToServer", {
+      name,
+      params,
+    });
+    return rawResult.result;
+  }
+
+  // broadcastMessage<TKey extends MessageName<TDef>>(name: TKey, params: MessageParams<TDef, TKey>) {
+  broadcastMessage<TKey extends MessageName<TDef>>(
+    ...[name, params]: MessageParams<TDef, TKey> extends undefined
+      ? [name: TKey, params?: undefined]
+      : [name: TKey, params: MessageParams<TDef, TKey>]
+  ) {
+    this.#messageManager.broadcastMessage(name, params);
+  }
+
+  addMessageListener<TKey extends MessageName<TDef>>(
+    name: TKey,
+    listener: MessageParams<TDef, TKey> extends undefined ? () => void
+      : (params: MessageParams<TDef, TKey>) => void,
+  ) {
+    this.#messageManager.addListener(name, listener);
+  }
+
+  removeMessageListener<TKey extends MessageName<TDef>>(
+    name: TKey,
+    listener: MessageParams<TDef, TKey> extends undefined ? () => void
+      : (params: MessageParams<TDef, TKey>) => void,
+  ) {
+    this.#messageManager.removeListener(name, listener);
   }
 
   close() {
