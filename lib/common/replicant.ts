@@ -32,9 +32,7 @@ export class Replicant<TValue> {
 
   subscribe(handler: ReplicantSubscriptionHandler<TValue>) {
     this.#subscriptionHandlers.add(handler);
-    if (this.#currentValue !== undefined) {
-      handler(this.#currentValue!, undefined);
-    }
+    handler(this.#currentValue!, undefined);
   }
 
   unsubscribe(handler: ReplicantSubscriptionHandler<TValue>) {
