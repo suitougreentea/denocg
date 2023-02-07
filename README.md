@@ -6,9 +6,19 @@ and a browser ([NodeCG](https://github.com/nodecg/nodecg) alternative)
 ## Features / Differences from NodeCG
 
 - Built-in strict typings -- thanks to the TypeScript native support of Deno
-- Simple setup -- just import the library (via the remote URL) and call a function in your own project
-- Server and Client library are provided -- no difference in graphics and dashboards
+- Simple setup -- just import the library (via the remote URL) and call a
+  function in your own project
+- Server and Client library are provided -- no difference in graphics and
+  dashboards
 - Modern API -- Promise-based, ES modules
+
+## Documentation
+
+[Wiki](https://github.com/suitougreentea/denocg/wiki)
+
+[Server API](https://deno.land/x/denocg/server/mod.ts)
+
+[Client API](https://deno.land/x/denocg/client/mod.ts)
 
 ## Example
 
