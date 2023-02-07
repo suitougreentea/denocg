@@ -4,7 +4,7 @@ import {
   RequestParams,
   TypeDefinition,
 } from "../common/types.ts";
-import { ServerClient } from "./client.ts";
+import { ServerClient } from "./_client.ts";
 
 export class RequestManager<TDef extends TypeDefinition> {
   #handlers: {

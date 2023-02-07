@@ -1,8 +1,8 @@
-import { posix, serve, serveDir } from "./deps.ts";
-import { SharedConfig } from "../common/config.ts";
+import { posix, serve, serveDir } from "./_deps.ts";
 import { TypeDefinition } from "../common/types.ts";
-import { ServerConfig } from "./config.ts";
-import { logger } from "./logger.ts";
+import { ServerConfig } from "./_config.ts";
+import { logger } from "./_logger.ts";
+import { SharedConfig } from "../common/_config.ts";
 
 export class AssetsServer<TDef extends TypeDefinition> {
   #config: ServerConfig<TDef>;

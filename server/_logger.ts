@@ -1,4 +1,4 @@
-import { log } from "./deps.ts";
+import { log } from "./_deps.ts";
 
 const formatter = "{datetime} [{levelName}] {msg}";
 

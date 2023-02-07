@@ -12,11 +12,11 @@ import {
   JsonRpcIO,
   JsonRpcReceiver,
   JsonRpcSender,
-} from "../common/json_rpc.ts";
+} from "../common/_json_rpc.ts";
 import {
   ClientToServerRpc,
   ServerToClientRpc,
-} from "../common/rpc_definition.ts";
+} from "../common/_rpc_definition.ts";
 
 export type ServerClientHandlers<TDef extends TypeDefinition> = {
   onSubscribeReplicant: <TKey extends ReplicantName<TDef>>(

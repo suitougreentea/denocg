@@ -4,7 +4,7 @@ import {
   MessageParams,
   TypeDefinition,
 } from "../common/types.ts";
-import { ServerClient } from "./client.ts";
+import { ServerClient } from "./_client.ts";
 
 export class MessageManager<TDef extends TypeDefinition> {
   #clients: Set<ServerClient<TDef>>;

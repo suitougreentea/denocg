@@ -1,5 +1,5 @@
-import { serve } from "./deps.ts";
-import { ServerConfig } from "./config.ts";
+import { serve } from "./_deps.ts";
+import { ServerConfig } from "./_config.ts";
 import {
   MessageListener,
   MessageName,
@@ -11,12 +11,12 @@ import {
   RequestParams,
   TypeDefinition,
 } from "../common/types.ts";
-import { ReplicantManager } from "./replicant_manager.ts";
-import { ServerClient, ServerClientHandlers } from "./client.ts";
+import { ReplicantManager } from "./_replicant_manager.ts";
+import { ServerClient, ServerClientHandlers } from "./_client.ts";
 import { Replicant } from "../common/replicant.ts";
-import { logger } from "./logger.ts";
-import { MessageManager } from "./message_manager.ts";
-import { RequestManager } from "./request_manager.ts";
+import { logger } from "./_logger.ts";
+import { MessageManager } from "./_message_manager.ts";
+import { RequestManager } from "./_request_manager.ts";
 
 export class SocketServer<TDef extends TypeDefinition> {
   #config: ServerConfig<TDef>;

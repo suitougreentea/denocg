@@ -1,18 +1,18 @@
-import { Replicant, ReplicantHandlers } from "../common/replicant.ts";
+import { ReplicantHandlers, ReplicantImpl } from "../common/_replicant_impl.ts";
 import {
   ReplicantName,
   ReplicantType,
   TypeDefinition,
 } from "../common/types.ts";
-import { ServerClient } from "./client.ts";
-import { ReplicantConfigEntry, ServerConfig } from "./config.ts";
-import { logger } from "./logger.ts";
+import { ServerClient } from "./_client.ts";
+import { ReplicantConfigEntry, ServerConfig } from "./_config.ts";
+import { logger } from "./_logger.ts";
 
 type ServerManagedReplicant<TDef extends TypeDefinition, TValue> = {
   config: ReplicantConfigEntry<TValue>;
   currentValue?: TValue;
   handlers: ReplicantHandlers<TValue>;
-  replicant: Replicant<TValue>;
+  replicant: ReplicantImpl<TValue>;
   subscribingClients: Set<ServerClient<TDef>>;
 };
 
@@ -57,7 +57,7 @@ export class ReplicantManager<TDef extends TypeDefinition> {
     };
     const initialValue = overriddenDefaultValue ??
       replicantConfigEntry?.defaultValue;
-    const replicant = new Replicant(handlers, initialValue);
+    const replicant = new ReplicantImpl(handlers, initialValue);
     this.#managedReplicants[name] = {
       config: replicantConfigEntry,
       currentValue: initialValue,

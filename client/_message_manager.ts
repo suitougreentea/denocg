@@ -1,5 +1,5 @@
-import { JsonRpcSender } from "../common/json_rpc.ts";
-import { ClientToServerRpc } from "../common/rpc_definition.ts";
+import { JsonRpcSender } from "../common/_json_rpc.ts";
+import { ClientToServerRpc } from "../common/_rpc_definition.ts";
 import {
   MessageListener,
   MessageName,

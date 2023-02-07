@@ -1,15 +1,15 @@
-import { ClientToServerRpc } from "../common/rpc_definition.ts";
-import { JsonRpcSender } from "../common/json_rpc.ts";
+import { ClientToServerRpc } from "../common/_rpc_definition.ts";
+import { JsonRpcSender } from "../common/_json_rpc.ts";
 import {
   ReplicantName,
   ReplicantType,
   TypeDefinition,
 } from "../common/types.ts";
-import { Replicant, ReplicantHandlers } from "../common/replicant.ts";
+import { ReplicantHandlers, ReplicantImpl } from "../common/_replicant_impl.ts";
 
 type ClientManagedReplicant<TDef extends TypeDefinition, TValue> = {
   handlers: ReplicantHandlers<TValue>;
-  replicant: Replicant<TValue>;
+  replicant: ReplicantImpl<TValue>;
 };
 
 export class ReplicantManager<TDef extends TypeDefinition> {
@@ -30,7 +30,7 @@ export class ReplicantManager<TDef extends TypeDefinition> {
     handlers.setValueFromLocal = async (value: ReplicantType<TDef, TKey>) => {
       await this.#jsonRpcSender.notify("updateReplicantValue", { name, value });
     };
-    const replicant = new Replicant(handlers);
+    const replicant = new ReplicantImpl(handlers);
     this.#managedReplicants[name] = { handlers, replicant };
 
     const result = await this.#jsonRpcSender.request("subscribeReplicant", {

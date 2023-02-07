@@ -2,13 +2,13 @@ import {
   JsonRpcIO,
   JsonRpcReceiver,
   JsonRpcSender,
-} from "../common/json_rpc.ts";
-import { MessageManager } from "./message_manager.ts";
+} from "../common/_json_rpc.ts";
+import { MessageManager } from "./_message_manager.ts";
 import { Replicant } from "../common/replicant.ts";
 import {
   ClientToServerRpc,
   ServerToClientRpc,
-} from "../common/rpc_definition.ts";
+} from "../common/_rpc_definition.ts";
 import {
   MessageListener,
   MessageName,
@@ -19,14 +19,14 @@ import {
   RequestParams,
   TypeDefinition,
 } from "../common/types.ts";
-import { ReplicantManager } from "./replicant_manager.ts";
-import { Socket } from "./socket.ts";
+import { ReplicantManager } from "./_replicant_manager.ts";
+import { Socket } from "./_socket.ts";
 
-export class Client<TDef extends TypeDefinition> {
+export class ClientImpl<TDef extends TypeDefinition> {
   #socket: Socket;
   #jsonRpcSender: JsonRpcSender<ClientToServerRpc<TDef>>;
   #jsonRpcReceiver: JsonRpcReceiver<ServerToClientRpc<TDef>>;
-  closed = false;
+  #isClosed = false;
 
   #replicantManager: ReplicantManager<TDef>;
   #messageManager: MessageManager<TDef>;
@@ -90,7 +90,7 @@ export class Client<TDef extends TypeDefinition> {
   async getReplicant<TKey extends ReplicantName<TDef>>(
     name: TKey,
   ): Promise<Replicant<ReplicantType<TDef, TKey>>> {
-    if (this.closed) throw new Error();
+    if (this.#isClosed) throw new Error();
 
     const managedReplicant = await this.#replicantManager.getReplicant(name);
     return managedReplicant.replicant;
@@ -132,7 +132,11 @@ export class Client<TDef extends TypeDefinition> {
   }
 
   close() {
-    this.closed = true;
+    this.#isClosed = true;
     this.#socket.close();
+  }
+
+  isClosed() {
+    return this.#isClosed;
   }
 }
