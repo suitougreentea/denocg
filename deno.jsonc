@@ -1,0 +1,16 @@
+{
+  "tasks": {
+    "fmt": "deno fmt --ignore=./coverage-unit,./coverage-e2e,./coverage-unit-html,./coverage-e2e-html,./coverage-all-html",
+
+    "lint": "deno lint --ignore=./coverage-unit,./coverage-e2e,./coverage-unit-html,./coverage-e2e-html,./coverage-all-html",
+    "check": "deno check client/mod.ts server/mod.ts",
+
+    "test-unit-core": "deno test --allow-env --allow-net --allow-read --allow-run --allow-write --ignore=test/e2e_test.ts",
+    "test-unit": "rm -rf ./coverage-unit && deno task test-unit-core --coverage=./coverage-unit && rm -rf ./coverage-unit-html && mkdir -p ./coverage-unit-html && deno coverage ./coverage-unit --lcov --output=./coverage-unit-html/lcov.info && cd ./coverage-unit-html && genhtml ./lcov.info",
+
+    "test-e2e-core": "cd test && deno test --allow-env --allow-net --allow-read --allow-run --allow-write --location=http://localhost:8514/",
+    "test-e2e": "rm -rf ./coverage-e2e && deno task test-e2e-core --coverage=../coverage-e2e && rm -rf ./coverage-e2e-html && mkdir -p ./coverage-e2e-html && deno coverage ./coverage-e2e --lcov --output=./coverage-e2e-html/lcov.info && cd ./coverage-e2e-html && genhtml ./lcov.info",
+
+    "test-all": "deno task lint && deno task check && deno task test-unit && deno task test-e2e && rm -rf ./coverage-all-html && mkdir -p ./coverage-all-html && deno coverage ./coverage-unit ./coverage-e2e --lcov --output=./coverage-all-html/lcov.info && cd ./coverage-all-html && genhtml ./lcov.info"
+  }
+}

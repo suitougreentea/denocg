@@ -37,3 +37,11 @@ cli/tests/.test_coverage/
 # WPT generated cert files
 /tools/wpt/certs/index.txt*
 /tools/wpt/certs/serial*
+
+/coverage-unit/
+/coverage-unit-html/
+/coverage-e2e/
+/coverage-e2e-html/
+/coverage-all-html/
+/test/replicants.json
+/test/server.log
