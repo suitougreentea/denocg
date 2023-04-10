@@ -3,7 +3,7 @@ import {
   MessageName,
   MessageParams,
   TypeDefinition,
-} from "../common/types.ts";
+} from "../common/_types.ts";
 import { ServerClient } from "./_client.ts";
 
 export class MessageManager<TDef extends TypeDefinition> {

@@ -10,10 +10,10 @@ import {
   RequestName,
   RequestParams,
   TypeDefinition,
-} from "../common/types.ts";
+} from "../common/_types.ts";
 import { ReplicantManager } from "./_replicant_manager.ts";
 import { ServerClient, ServerClientHandlers } from "./_client.ts";
-import { Replicant } from "../common/replicant.ts";
+import { Replicant } from "../common/_replicant.ts";
 import { logger } from "./_logger.ts";
 import { MessageManager } from "./_message_manager.ts";
 import { RequestManager } from "./_request_manager.ts";

@@ -4,7 +4,7 @@ import {
   ReplicantName,
   ReplicantType,
   TypeDefinition,
-} from "../common/types.ts";
+} from "../common/_types.ts";
 import { ReplicantHandlers, ReplicantImpl } from "../common/_replicant_impl.ts";
 
 type ClientManagedReplicant<TDef extends TypeDefinition, TValue> = {

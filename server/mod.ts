@@ -8,10 +8,10 @@ import {
   RequestHandler,
   RequestName,
   TypeDefinition,
-} from "../common/types.ts";
+} from "../common/_types.ts";
 import { AssetsServer } from "./_assets_server.ts";
 import { SocketServer } from "./_socket_server.ts";
-import { Replicant } from "../common/replicant.ts";
+import { Replicant } from "../common/_replicant.ts";
 
 export async function launchServer<TDef extends TypeDefinition>(
   config: ServerConfig<TDef>,
@@ -65,3 +65,6 @@ export interface Server<TDef extends TypeDefinition> {
 }
 
 export { type ServerConfig } from "./_config.ts";
+
+export * as Types from "../common/_types.ts";
+export * from "../common/_replicant.ts";

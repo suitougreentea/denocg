@@ -1,5 +1,5 @@
 import { SharedConfig } from "../common/_config.ts";
-import { Replicant } from "../common/replicant.ts";
+import { Replicant } from "../common/_replicant.ts";
 import {
   MessageListener,
   MessageName,
@@ -10,7 +10,7 @@ import {
   RequestParams,
   RequestResult,
   TypeDefinition,
-} from "../common/types.ts";
+} from "../common/_types.ts";
 import { ClientImpl } from "./_client_impl.ts";
 
 export async function getClient<TDef extends TypeDefinition>(): Promise<
@@ -49,3 +49,6 @@ export interface Client<TDef extends TypeDefinition> {
   close(): void;
   isClosed(): boolean;
 }
+
+export * as Types from "../common/_types.ts";
+export * from "../common/_replicant.ts";

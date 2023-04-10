@@ -4,7 +4,7 @@ import {
   JsonRpcSender,
 } from "../common/_json_rpc.ts";
 import { MessageManager } from "./_message_manager.ts";
-import { Replicant } from "../common/replicant.ts";
+import { Replicant } from "../common/_replicant.ts";
 import {
   ClientToServerRpc,
   ServerToClientRpc,
@@ -18,7 +18,7 @@ import {
   RequestName,
   RequestParams,
   TypeDefinition,
-} from "../common/types.ts";
+} from "../common/_types.ts";
 import { ReplicantManager } from "./_replicant_manager.ts";
 import { Socket } from "./_socket.ts";
 

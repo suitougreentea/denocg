@@ -3,7 +3,7 @@ import {
   ReplicantName,
   ReplicantType,
   TypeDefinition,
-} from "../common/types.ts";
+} from "../common/_types.ts";
 import { ServerClient } from "./_client.ts";
 import { ReplicantConfigEntry, ServerConfig } from "./_config.ts";
 import { logger } from "./_logger.ts";

@@ -2,7 +2,7 @@ import {
   ReplicantName,
   ReplicantType,
   TypeDefinition,
-} from "../common/types.ts";
+} from "../common/_types.ts";
 
 export type ReplicantConfigEntry<TValue> = {
   defaultValue?: TValue;

@@ -7,7 +7,7 @@ import {
   RequestParams,
   RequestResult,
   TypeDefinition,
-} from "./types.ts";
+} from "./_types.ts";
 
 export type ClientToServerRpc<TDef extends TypeDefinition> = {
   subscribeReplicant: <TKey extends ReplicantName<TDef>>(

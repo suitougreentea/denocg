@@ -1,5 +1,5 @@
 import { posix, serve, serveDir } from "./_deps.ts";
-import { TypeDefinition } from "../common/types.ts";
+import { TypeDefinition } from "../common/_types.ts";
 import { ServerConfig } from "./_config.ts";
 import { logger } from "./_logger.ts";
 import { SharedConfig } from "../common/_config.ts";

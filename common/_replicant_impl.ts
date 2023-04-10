@@ -1,5 +1,5 @@
 import { equal } from "https://deno.land/x/equal@v1.5.0/mod.ts";
-import { Replicant, ReplicantSubscriptionHandler } from "./replicant.ts";
+import { Replicant, ReplicantSubscriptionHandler } from "./_replicant.ts";
 
 export type ReplicantHandlers<TValue> = {
   setValueFromRemote?: (value: TValue | undefined) => void;

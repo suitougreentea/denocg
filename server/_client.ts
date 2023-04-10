@@ -7,7 +7,7 @@ import {
   RequestParams,
   RequestResult,
   TypeDefinition,
-} from "../common/types.ts";
+} from "../common/_types.ts";
 import {
   JsonRpcIO,
   JsonRpcReceiver,

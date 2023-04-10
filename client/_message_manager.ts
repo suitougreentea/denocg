@@ -5,7 +5,7 @@ import {
   MessageName,
   MessageParams,
   TypeDefinition,
-} from "../common/types.ts";
+} from "../common/_types.ts";
 
 export class MessageManager<TDef extends TypeDefinition> {
   #jsonRpcSender: JsonRpcSender<ClientToServerRpc<TDef>>;
