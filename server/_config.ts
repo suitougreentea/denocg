@@ -10,6 +10,7 @@ export type ReplicantConfigEntry<TValue> = {
 };
 
 export type ServerConfig<TDef extends TypeDefinition> = {
+  socketHostname?: string;
   socketPort: number;
   assetsRoot: string;
   assetsPort: number;

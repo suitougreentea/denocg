@@ -13,13 +13,22 @@ import {
 } from "../common/_types.ts";
 import { ClientImpl } from "./_client_impl.ts";
 
-export async function getClient<TDef extends TypeDefinition>(): Promise<
+export async function getClient<TDef extends TypeDefinition>(
+  config?: string | SharedConfig,
+): Promise<
   Client<TDef>
 > {
-  const config = await (await fetch("/__config.json")).json() as SharedConfig;
-  const hostname = window.location.hostname;
+  let resolvedConfig: SharedConfig;
+  if (typeof (config) === "object") {
+    resolvedConfig = config as SharedConfig;
+  } else {
+    const configPath = config ?? "__config.json";
+    resolvedConfig = await (await fetch(configPath)).json() as SharedConfig;
+  }
+  const hostname = resolvedConfig.socketHostname ?? window.location.hostname;
+  const port = resolvedConfig.socketPort;
   const client = new ClientImpl<TDef>(
-    `ws://${hostname}:${config.socketPort}/`,
+    `ws://${hostname}:${port}/`,
   );
   return client;
 }

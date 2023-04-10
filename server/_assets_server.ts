@@ -15,6 +15,7 @@ export class AssetsServer<TDef extends TypeDefinition> {
 
   async start() {
     const sharedConfig: SharedConfig = {
+      socketHostname: this.#config.socketHostname,
       socketPort: this.#config.socketPort,
     };
 
