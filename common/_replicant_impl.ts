@@ -1,4 +1,4 @@
-import equal from "https://esm.sh/fast-deep-equal@3.1.3";
+import equal from "npm:fast-deep-equal@3.1.3";
 import { Replicant, ReplicantSubscriptionHandler } from "./_replicant.ts";
 
 export type ReplicantHandlers<TValue> = {
