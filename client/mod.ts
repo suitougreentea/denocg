@@ -25,10 +25,11 @@ export async function getClient<TDef extends TypeDefinition>(
     const configPath = config ?? "__config.json";
     resolvedConfig = await (await fetch(configPath)).json() as SharedConfig;
   }
-  const hostname = resolvedConfig.socketHostname ?? window.location.hostname;
+  const hostname = resolvedConfig.socketHostname ?? globalThis.location.hostname;
   const port = resolvedConfig.socketPort;
+  const socketProtocol = globalThis.location.protocol === "https:" ? "wss" : "ws";
   const client = new ClientImpl<TDef>(
-    `ws://${hostname}:${port}/`,
+    `${socketProtocol}://${hostname}:${port}/`,
   );
   return client;
 }
